@@ -6,27 +6,32 @@ const Stream = ({ token }) => {
   const [alerts, setAlerts] = useState([]);
   const [streamError, setStreamError] = useState(''); 
   const [alertsError, setAlertsError] = useState(''); 
+  const [isStreamLoading, setIsStreamLoading] = useState(true);
+  const [areAlertsLoading, setAreAlertsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStream = async () => {
+      setIsStreamLoading(true);
       try {
         const response = await axios.get('http://localhost:8000/stream', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          responseType: 'blob', 
+          responseType: 'blob',
         });
         
         const imageUrl = URL.createObjectURL(response.data); 
         setImageSrc(imageUrl);
-        setStreamError(''); 
+        setStreamError('');
       } catch (error) {
-        setStreamError('Failed to load the stream. Please try again later.'); 
+        setStreamError('Failed to load the stream. Please try again later.');
         console.error('Error fetching stream:', error);
       }
+      setIsStreamLoading(false);
     };
 
     const fetchAlerts = async () => {
+      setAreAlertsLoading(true);
       try {
         const response = await axios.get('http://localhost:8000/alerts', {
           headers: {
@@ -39,14 +44,15 @@ const Stream = ({ token }) => {
         setAlertsError('Failed to load alerts. Please try again later.');
         console.error('Error fetching alerts:', error);
       }
+      setAreAlertsLoading(false);
     };
 
     fetchStream();
     fetchAlerts();
-    const streamInterval = setInterval(fetchStream, 2000);
-    const alertInterval = setInterval(fetchAlerts, 5000); 
 
-    
+    const streamInterval = setInterval(fetchStream, 2000);
+    const alertInterval = setInterval(fetchAlerts, 5000);
+
     return () => {
       clearInterval(streamInterval);
       clearInterval(alertInterval);
@@ -54,27 +60,31 @@ const Stream = ({ token }) => {
   }, [token]);
 
   return (
-    <div className="stream-container">
-      <h2>Live Stream</h2>
-      {streamError ? (
-        <p className="error">{streamError}</p>
+    <div className="stream-container p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4">Live Stream</h2>
+      {isStreamLoading ? (
+        <p className="text-gray-500">Loading stream...</p>
+      ) : streamError ? ( 
+        <p className="text-red-500">{streamError}</p>
       ) : (
-        imageSrc && <img src={imageSrc} alt="Live Stream" style={{ width: '100%', height: 'auto' }} />
+        imageSrc && <img src={imageSrc} alt="Live Stream" className="w-full h-auto rounded-md shadow" />
       )}
       
-      <h3>Active Alerts</h3>
-      {alertsError ? ( 
-        <p className="error">{alertsError}</p>
+      <h3 className="text-lg font-semibold mt-6">Active Alerts</h3>
+      {areAlertsLoading ? (
+        <p className="text-gray-500">Loading alerts...</p>
+      ) : alertsError ? ( 
+        <p className="text-red-500">{alertsError}</p>
       ) : (
-        <ul>
+        <ul className="mt-2 space-y-2">
           {alerts.length > 0 ? (
             alerts.map((alert, index) => (
-              <li key={index}>
+              <li key={index} className="p-2 bg-blue-100 rounded-md">
                 <strong>Location:</strong> {alert.location}, <strong>Level:</strong> {alert.alert_level}
               </li>
             ))
           ) : (
-            <p>No active alerts</p>
+            <p className="text-gray-500">No active alerts</p>
           )}
         </ul>
       )}

@@ -43,18 +43,21 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* Redirect to the dashboard if token is valid, otherwise render Login */}
-        <Route 
-          path="/" 
-          element={token ? <Navigate to="/dashboard" /> : <Login setToken={setToken} />} 
-        />
-        
-        <Route 
-          path="/dashboard" 
-          element={token ? <Dashboard token={token} handleLogout={handleLogout} /> : <Navigate to="/" />} 
-        />
-      </Routes>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="max-w-3xl w-full bg-white shadow-md rounded-lg overflow-hidden">
+          <Routes>
+            <Route 
+              path="/" 
+              element={token ? <Navigate to="/dashboard" /> : <Login setToken={setToken} />} 
+            />
+            
+            <Route 
+              path="/dashboard" 
+              element={token ? <Dashboard token={token} handleLogout={handleLogout} /> : <Navigate to="/" />} 
+            />
+          </Routes>
+        </div>
+      </div>
     </Router>
   );
 }
